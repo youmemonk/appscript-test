@@ -1,0 +1,304 @@
+<script src="https://apis.google.com/js/api.js"></script>
+    <script>
+
+        function search_sheet() {
+            const api_address = "https://sheetsu.com/apis/v1.0su/441f6bfab693";
+            var x = document.getElementById("search");
+            var baseQuery = {}; //? Object
+
+            // var baseQuery = {"Document Name" : ""}; //? Object
+            
+            //! Alternate Way
+            // console.log(x[0].value)
+
+            //! Lookup
+            successFunc = printit(); 
+
+            baseQuery["Document Name"] = "*";
+            // console.log(baseQuery)
+
+            reg = [];
+            rec = [];
+
+            if (x.elements[0].value) {
+                var searchQuery = "*" + x.elements[0].value + "*";
+                // console.log(searchQuery)
+                baseQuery["Document Name"] = searchQuery;
+            }
+
+            //! Checking Records
+            if (document.getElementById("gcp").checked == true) {
+                rec.push("GCP");
+                // console.log(rec)
+            }
+            if (document.getElementById("aws").checked == true) {
+                rec.push("AWS");
+            }
+            if (document.getElementById("gws").checked == true) {
+                rec.push("GWS");
+            }
+            if (document.getElementById("happier").checked == true) {
+                rec.push("Happier");
+            }
+            if (document.getElementById("recognic").checked == true) {
+                rec.push("Recognic");
+            }
+            if (document.getElementById("location-intelligence").checked == true) {
+                rec.push("Location Intelligence");
+            }
+            if (document.getElementById("am").checked == true) {
+                rec.push("AM");
+            }
+            if (document.getElementById("chrome").checked == true) {
+                rec.push("Chrome");
+            }
+            if (document.getElementById("dna").checked == true) {
+                rec.push(escape("D&A"));
+            }
+            if (document.getElementById("ms").checked == true) {
+                rec.push("MS");
+            }
+
+            // console.log(rec)
+
+            //! Checking Regions
+            if (document.getElementById("apac").checked == true) {
+                reg.push("APAC");
+            }
+            if (document.getElementById("india").checked == true) {
+                reg.push("INDIA");
+            }
+            if (document.getElementById("amer").checked == true) {
+                reg.push("AMER");
+            }
+            if (document.getElementById("emea").checked == true) {
+                reg.push("EMEA");
+            }
+
+            //! For Multiple Selects
+            if (reg.length > 0 && rec.length > 0) {
+                for (let i = 0; i < reg.length; i++) {
+                    baseQuery["Region"] = reg[i];
+                    for (let j = 0; j < rec.length; j++) {
+                        baseQuery["Record type"] = rec[j];
+                        Sheetsu.read(
+                            api_address, {
+                            search: baseQuery,
+                            ignore_case: true,
+                            limit: 20,
+                        },
+
+                        ).then(successFunc, errorFunc);
+                    }
+                }
+            } else if (reg.length > 0 && rec.length == 0) {
+                for (let i = 0; i < reg.length; i++) {
+                    baseQuery["Region"] = reg[i];
+                    Sheetsu.read(
+                        api_address, {
+                        search: baseQuery,
+                        ignore_case: true,
+                        limit: 20,
+                    },
+
+                    ).then(successFunc, errorFunc);
+                }
+            } else if (reg.length == 0 && rec.length > 0) {
+                for (let j = 0; j < rec.length; j++) {
+                    baseQuery["Record type"] = rec[j];
+                    Sheetsu.read(
+                        api_address, {
+                        search: baseQuery,
+                        ignore_case: true,
+                        limit: 20,
+                    },
+
+                    ).then(successFunc, errorFunc);
+                }
+            } else {
+                Sheetsu.read(
+                    api_address, {
+                    search: baseQuery,
+                    ignore_case: true,
+                    limit: 20,
+                },
+
+                ).then(successFunc, errorFunc);
+            }
+        }
+        console.log(data)
+        // console.log(document.getElementById('data'))
+
+        var tableData = data;
+        var url = []
+        var i = 0;
+
+        // console.log(tableData)
+
+        function printit() { //* populates the table
+            var temp = "";
+            //Empty url array
+            while (url.length > 0) {
+                url.pop();
+            }
+            i = 0;
+
+            function successFunc(data) {
+                if (data.length > 0) {
+                    data.forEach((itemData) => {
+                        temp += "<tr>";
+                        temp += "<td>" + `<input type="checkbox" id="multiple-${i}"/>` + "</td>";
+                        temp += "<td>" + itemData["Document Name"] + "</td>";
+                        temp += "<td>" +
+                            `<a href=${itemData["Document Link"]}  target="_blank">
+                                <img src="https://1000logos.net/wp-content/uploads/2020/05/Google-Docs-logo.png" 
+                                alt="Err" width="30" height="auto"></a>` +
+                            "</td>";
+                        temp += "<td>" + itemData["Description"] + "</td>";
+                        temp += "<td>" + itemData["Record type"] + "</td>";
+                        i++;
+                    });
+                }
+                document.getElementById("data").innerHTML = temp;
+                console.log(data)
+                tableData = data;
+
+                updateurl(tableData);
+            }
+            return successFunc;
+        }
+
+        function updateurl(tableData) {
+            for (let i = 0; i < tableData.length; i++) {
+                url.push(tableData[i]["Document Link"])
+            }
+        }
+
+        function errorFunc() {
+            var temp = "";
+            // document.getElementById("data").innerHTML = temp;
+            document.getElementById("data").innerHTML = "No records found";
+        };
+
+        //? Can this run directly in the script 
+        //! Should run directly while the page reloads
+        function authenticate() {
+            return gapi.auth2
+                .getAuthInstance()
+                .signIn({
+                    // Use in the scope just in case
+                    // https://www.googleapis.com/auth/drive.photos.readonly
+                    scope: "https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file",
+                })
+
+                //! Can be Removed
+                .then(
+                    function () {
+                        console.log("Sign-in successful");
+                        alert('Sign-in successful');
+                    },
+                    function (err) {
+                        console.error("Error signing in", err);
+                        alert('Error signing in');
+                    }
+                );
+        }
+
+        //! Should run directly when the script loads
+        function loadClient() {
+            gapi.client.setApiKey("AIzaSyALp5CeNEOTGlUZvQitm5Toxqn3roo0qas");
+            return gapi.client
+                .load("https://content.googleapis.com/discovery/v1/apis/drive/v3/rest")
+                
+                //! Can be removed ?
+                .then(
+                    function () {
+                        console.log("GAPI client loaded for API");
+                    },
+                    function (err) {
+                        console.error("Error loading GAPI client for API", err);
+                    }
+                );
+        }
+        // Drive API Below
+        // Make sure the client is loaded and sign-in is complete before calling this method.
+        function execute() {
+
+            console.log(url)
+            function getIdFromUrl(url) {
+                // var pp = url.match(/[-\w]{25,}/);
+                // console.log(pp)
+                // console.log(url)
+
+                return url.match(/[-\w]{25,}/);
+            }
+
+            var checkedUrl = []
+            //Selected url
+            for (let i = 0; i < url.length; i++) {
+                var x = url[i]
+                if (document.getElementById(`multiple-${i}`).checked) {
+                    var doc_id = getIdFromUrl(x)
+                    checkedUrl.push(doc_id)
+                    gapi.client.drive.files
+                        .copy({
+                            fileId: doc_id,
+                            resource: {
+                                "parents": ["1Di1luMkvY2uxz6Rae8KeuDW80foEAHmZ"]
+                            },
+                        })
+
+                        .then(
+                            function (response) {
+                                // Handle the results here (response.result has the parsed body).
+                                console.log("Response", response);
+                                $(document).ready(function () {
+                                    $("#mySuccessModal").modal();
+                                });
+                            },
+                            function (err) {
+                                console.error("Execute error", err);
+                                $(document).ready(function () {
+                                    $("#myFailureModal").modal();
+                                });
+                            }
+                        );
+                }
+
+
+            }
+
+            //console.log(checkedUrl);
+            // console.log(getIdFromUrl(x))
+
+
+            // console.log(x)
+            // return gapi.client.drive.files
+            //     .copy({
+            //         fileId: doc_id,
+            //         resource: {
+            //             "parents": ["1Di1luMkvY2uxz6Rae8KeuDW80foEAHmZ"]
+            //         },
+            //     })
+            //     .then(
+            //         function (response) {
+            //             // Handle the results here (response.result has the parsed body).
+            //             console.log("Response", response);
+            //         },
+            //         function (err) {
+            //             console.error("Execute error", err);
+            //         }
+            //     );
+        }
+        gapi.load("client:auth2", function () {
+            gapi.auth2.init({
+                client_id: "828363173928-blovod76p8vohpbemrggq5jnm2qb79li.apps.googleusercontent.com",
+            });
+        });
+
+
+    </script>
+
+    <script src="https://load.sheetsu.com"></script>
+    <script src="https://script.sheetsu.com/"></script>
+    <!-- <script src="https://apis.google.com/js/api.js"></script> -->
