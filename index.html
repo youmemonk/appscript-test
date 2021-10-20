@@ -2,31 +2,61 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base target="_top">
+    <script>
+        function updateButton(data) {
+            // button.value = 'Clicked by ' + email;
+            // console.log(data)
 
-    <!-- Google Sign In Button  -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+            var temp = ""
+            for (var itemData in data) {
+                temp += "<tr>";
+                // temp += "<td>" + "</td>";
+                temp += "<td>" + this.data[itemData][1] + "</td>";
+                // temp += "<td>" +
+                // `<a href=${itemData["Document Link"]}  target="_blank">
+                //             <img src="https://1000logos.net/wp-content/uploads/2020/05/Google-Docs-logo.png" 
+                //             alt="Err" width="30" height="auto"></a>` +
+                // "</td>";
+                // temp += "<td>" + itemData["Description"] + "</td>";
+                // temp += "<td>" + itemData["Record type"] + "</td>";
+                temp += "</tr>";
+                // i++;
+            }
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script> -->
+            console.log(data)
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
+            // data.forEach((itemData) => {
+            //     temp += "<tr>";
+            //     temp += "<td>" + `<input type="checkbox" id="multiple-${i}"/>` + "</td>";
+            //     temp += "<td>" + itemData["Document Name"] + "</td>";
+            //     temp += "<td>" +
+            //         `<a href=${itemData["Document Link"]}  target="_blank">
+            //             <img src="https://1000logos.net/wp-content/uploads/2020/05/Google-Docs-logo.png" 
+            //             alt="Err" width="30" height="auto"></a>` +
+            //         "</td>";
+            //     temp += "<td>" + itemData["Description"] + "</td>";
+            //     temp += "<td>" + itemData["Record type"] + "</td>";
+            //     i++;
+            // });
+
+            document.getElementById("data").innerHTML = temp;
+            console.log(data)
+            // tableData = data;
+
+        }
+
+        // console.log(data)
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
-        integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous">
-    </script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
-        integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous">
-    </script>
-
-    <title>Document</title>
 </head>
 
 <body>
+    <input type="button" value="Click Here" onclick="google.script.run
+          .withSuccessHandler(updateButton)
+          .withUserObject(this)
+          .getDo()" />
+
+
     <!--Table-->
     <div class="container">
         <table class="table" id="mytable">
@@ -43,90 +73,6 @@
         </table>
     </div>
 
-    <!-- <button>Run karle bhai</button> -->
-
-    <button id="btn" onclick="google.script.run
-          .withSuccessHandler(getDo)
-          .userClicked()">Run karJa
-    </button>
-
-
-    <script>
-        var data = []
-
-        function getDo() {
-            google.script.run.getDo();
-
-            var sheetName = "Sheet1";
-            var sheetId = "1moHFCyeeZDUIyYYCXfMaLJwnpxYu4eMStottyhrFpV8";
-
-            var book = SpreadsheetApp.openById(sheetId);
-            var sheet = book.getSheetByName(sheetName);
-
-            var json = convertSheet2JsonText(sheet);
-            var data = JSON.stringify(json)
-            console.log(data)
-
-            // return (ContentService
-            //     .createTextOutput(JSON.stringify(json))
-            //     .setMimeType(ContentService.MimeType.JSON));
-            return (data)
-        }
-
-        console.log(data)
-
-        function convertSheet2JsonText(sheet) {
-
-            var sheetName = "Sheet1";
-            var sheetId = "1moHFCyeeZDUIyYYCXfMaLJwnpxYu4eMStottyhrFpV8";
-
-            var book = SpreadsheetApp.openById(sheetId);
-            var sheet = book.getSheetByName(sheetName);
-            var colStartIndex = 1;
-            var rowNum = 1;
-            var firstRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
-            var firstRowValues = firstRange.getValues();
-            var titleColumns = firstRowValues[0];
-
-            // after the second line(data)
-            var lastRow = sheet.getLastRow();
-            var rowValues = [];
-            for (var rowIndex = 2; rowIndex <= lastRow; rowIndex++) {
-                var colStartIndex = 1;
-                var rowNum = 1;
-                var range = sheet.getRange(rowIndex, colStartIndex, rowNum,
-                    sheet.getLastColumn());
-                var values = range.getValues();
-                rowValues.push(values[0]);
-            }
-
-            // create json
-            var jsonArray = [];
-            for (var i = 0; i < rowValues.length; i++) {
-                var line = rowValues[i];
-                var json = new Object();
-                for (var j = 0; j < titleColumns.length; j++) {
-                    json[titleColumns[j]] = line[j];
-                }
-                jsonArray.push(json);
-            }
-            return jsonArray;
-        }
-
-        //         function doStuff() {
-        // google.script.run.doStuff()
-        // console.log("ggg")
-        //   }
-
-        // doGet()
-        // google.script.run.getDo();
-
-        // function dggd(){
-        //   google.script.run.getDo()
-
-        //   console.log('gsdsd')
-        // }
-    </script>
 
 </body>
 
